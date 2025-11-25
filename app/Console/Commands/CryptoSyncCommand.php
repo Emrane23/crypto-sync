@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\CryptoAsset;
 use App\Services\BinanceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -32,18 +31,16 @@ class CryptoSyncCommand extends Command
                     'last_price' => (float)$ticker['lastPrice'],
                     'price_change_percent' => (float)$ticker['priceChangePercent'],
                     'volume_24h' => (float)$ticker['volume'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ])
                 ->values();
 
-                foreach ($filtered->toArray() as $key => $ticker) {
-                    CryptoAsset::create($ticker);
-                }
-
-            // DB::table('crypto_assets')->upsert(
-            //     $filtered->toArray(),
-            //     ['symbol'],
-            //     ['last_price', 'price_change_percent', 'volume_24h', 'updated_at']
-            // );
+            DB::table('crypto_assets')->upsert(
+                $filtered->toArray(),
+                ['symbol'],
+                ['last_price', 'price_change_percent', 'volume_24h','created_at', 'updated_at']
+            );
 
             Cache::forget('top_gainers');
 
